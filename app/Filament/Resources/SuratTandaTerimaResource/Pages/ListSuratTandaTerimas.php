@@ -8,6 +8,7 @@ use Filament\Resources\Components\Tab;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\SuratTandaTerimaResource;
+use App\Models\SuratTandaTerima;
 
 class ListSuratTandaTerimas extends ListRecords
 {
@@ -28,8 +29,26 @@ class ListSuratTandaTerimas extends ListRecords
 
         $companies = Company::orderBy('name', 'asc')->get();
         foreach ($companies as $company) {
-            $data[$company->slug] = Tab::make()->modifyQueryUsing(fn (Builder $query) => $query->where('company_id', $company->id));
+            $data[$company->slug] = Tab::make()->modifyQueryUsing(fn(Builder $query) => $query->where('company_id', $company->id));
         }
+
+        $data = [];
+
+        // Add a tab for all data
+        $data['all'] = Tab::make('All')
+            ->modifyQueryUsing(fn(Builder $query) => $query)
+            ->badge(fn() => SuratTandaTerima::count());
+
+        // Get companies, excluding specific slugs and names
+        $companies = Company::orderBy('name', 'asc')
+            ->get();
+
+        foreach ($companies as $company) {
+            $data[$company->slug] = Tab::make($company->slug)
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('company_id', $company->id))
+                ->badge(fn() => SuratTandaTerima::where('company_id', $company->id)->count());
+        }
+
         return $data;
     }
 }

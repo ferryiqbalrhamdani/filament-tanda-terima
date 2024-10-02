@@ -5,17 +5,18 @@ namespace App\Filament\Resources;
 use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Tables;
+use App\Models\Company;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use App\Models\SuratTandaTerima;
 use Filament\Resources\Resource;
 use Filament\Resources\Components\Tab;
 use Filament\Forms\Components\Repeater;
+use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\SuratTandaTerimaResource\Pages;
 use App\Filament\Resources\SuratTandaTerimaResource\RelationManagers;
-use App\Models\Company;
 
 class SuratTandaTerimaResource extends Resource
 {
@@ -35,6 +36,7 @@ class SuratTandaTerimaResource extends Resource
                             ->preload()
                             ->required()
                             ->reactive()
+                            ->disabled(fn($livewire) => $livewire instanceof Pages\EditSuratTandaTerima) // Lock in edit mode
                             ->afterStateUpdated(function ($state, $set, $get) {
                                 $tanggal = $get('tanggal');
                                 if ($state && $tanggal) {
@@ -50,6 +52,7 @@ class SuratTandaTerimaResource extends Resource
                             ->unique(SuratTandaTerima::class, 'nomor_document', ignoreRecord: true)
                             ->required()
                             ->readOnly() // Set this to disabled to prevent manual editing
+                            ->helperText('Nomor Tanda Terima Akan Otomatis Dibuat')
                             ->maxLength(255),
                         Forms\Components\DatePicker::make('tanggal')
                             ->required()
@@ -57,8 +60,23 @@ class SuratTandaTerimaResource extends Resource
                             ->afterStateUpdated(function ($state, $set, $get) {
                                 $companyId = $get('company_id');
                                 if ($companyId && $state) {
-                                    $nomorDocument = SuratTandaTerima::generateNomorDocument($companyId, $state);
-                                    $set('nomor_document', $nomorDocument);
+                                    // Fetch the latest document for the company
+                                    $latestDocument = SuratTandaTerima::where('company_id', $companyId)
+                                        ->orderBy('tanggal', 'desc')
+                                        ->first();
+
+                                    // If a previous document exists, validate the new date
+                                    if ($latestDocument && Carbon::parse($state)->lt($latestDocument->tanggal)) {
+                                        $set('tanggal', null); // Reset the date if invalid
+                                        Notification::make()
+                                            ->title('Error')
+                                            ->body('Tanggal tidak boleh lebih kecil dari nomor surat sebelumnya.')
+                                            ->danger()
+                                            ->send();
+                                    } else {
+                                        $nomorDocument = SuratTandaTerima::generateNomorDocument($companyId, $state);
+                                        $set('nomor_document', $nomorDocument);
+                                    }
                                 }
                             }),
                     ])
@@ -119,11 +137,11 @@ class SuratTandaTerimaResource extends Resource
                         return $query
                             ->when(
                                 $data['date_transaction_from'] ?? null,
-                                fn (Builder $query, $date): Builder => $query->whereDate('tanggal', '>=', $date),
+                                fn(Builder $query, $date): Builder => $query->whereDate('tanggal', '>=', $date),
                             )
                             ->when(
                                 $data['date_transaction_until'] ?? null,
-                                fn (Builder $query, $date): Builder => $query->whereDate('tanggal', '<=', $date),
+                                fn(Builder $query, $date): Builder => $query->whereDate('tanggal', '<=', $date),
                             );
                     })
                     ->indicateUsing(function (array $data): array {
@@ -154,7 +172,7 @@ class SuratTandaTerimaResource extends Resource
                     ->label('Print PDF')
                     ->icon('heroicon-o-printer')
                     ->color('info')
-                    ->url(fn (SuratTandaTerima $record) => route('print.surat_tanda_terima', $record))
+                    ->url(fn(SuratTandaTerima $record) => route('print.surat_tanda_terima', $record))
                     ->openUrlInNewTab(),
             ])
             ->bulkActions([

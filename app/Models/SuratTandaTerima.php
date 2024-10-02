@@ -36,18 +36,21 @@ class SuratTandaTerima extends Model
         $companySlug = $company->slug;
         $month = date('m', strtotime($tanggal));
         $year = date('Y', strtotime($tanggal));
+
+        // Get the latest document for the company and year
         $latestDocument = self::where('company_id', $companyId)
             ->whereYear('created_at', $year)
             ->orderBy('nomor_document', 'desc')
             ->first();
 
+        // Set the next document number
         $nextNumber = 1;
-
         if ($latestDocument) {
             $lastNumber = intval(substr($latestDocument->nomor_document, 0, 3));
             $nextNumber = $lastNumber + 1;
         }
 
+        // Return the new document number with only month and year formatting
         return sprintf('%03d/%s/%02d-%d', $nextNumber, $companySlug, $month, $year);
     }
 }
