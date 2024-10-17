@@ -202,7 +202,6 @@ class SuratTandaTerimaResource extends Resource
                                     ->label('Quantity')
                                     ->default(0)
                                     ->live(onBlur: true)
-                                    ->minValue(1)
                                     ->numeric(),
                                 Forms\Components\TextInput::make('satuan'),
                             ])->columns(3),
