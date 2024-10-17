@@ -179,9 +179,9 @@
                 <td style="text-align: center">{{ $index + 1 }}</td>
                 <td style="text-align: left">{{ $item->keterangan }}</td>
                 <td style="text-align: center">
-                    {{ $item->nomor_document ?? '-' }}
+                    {{ $item->nomor_document ?? '' }}
                 </td>
-                <td style="text-align: center">{{ $item->qty .' '.$item->satuan }} </td>
+                <td style="text-align: center">{{ $item->qty == 0 ? '' : $item->qty .' '.$item->satuan }} </td>
             </tr>
             @endforeach
 
