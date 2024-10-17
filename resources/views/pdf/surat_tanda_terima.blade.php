@@ -178,7 +178,7 @@
             <tr class="item">
                 <td style="text-align: center">{{ $index + 1 }}</td>
                 <td style="text-align: left">{{ $item->keterangan }}</td>
-                <td style="text-align: {{ $item->nomor_document ? 'left' : 'center' }}">
+                <td style="text-align: center">
                     {{ $item->nomor_document ?? '-' }}
                 </td>
                 <td style="text-align: center">{{ $item->qty .' '.$item->satuan }} </td>
