@@ -195,7 +195,6 @@ class SuratTandaTerimaResource extends Resource
                         Forms\Components\Group::make()
                             ->schema([
                                 Forms\Components\Textarea::make('keterangan')
-                                    ->required()
                                     ->columnSpanFull(),
                                 Forms\Components\TextInput::make('nomor_document')
                                     ->label('Nomor Dokumen'),
@@ -204,8 +203,7 @@ class SuratTandaTerimaResource extends Resource
                                     ->default(0)
                                     ->live(onBlur: true)
                                     ->minValue(1)
-                                    ->numeric()
-                                    ->required(),
+                                    ->numeric(),
                                 Forms\Components\TextInput::make('satuan'),
                             ])->columns(3),
                     ]),
