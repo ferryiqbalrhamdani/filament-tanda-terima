@@ -18,6 +18,9 @@ class SuratTandaTerima extends Model
         'nomor_document',
         'tanggal',
         'total',
+        'status',
+        'penanggung_jawab',
+        'keterangan',
     ];
 
     public function company()

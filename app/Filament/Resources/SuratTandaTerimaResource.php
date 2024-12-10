@@ -10,6 +10,7 @@ use Filament\Forms\Form;
 use Filament\Tables\Table;
 use App\Models\SuratTandaTerima;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\Alignment;
 use Filament\Resources\Components\Tab;
 use Filament\Forms\Components\Repeater;
 use Filament\Notifications\Notification;
@@ -113,6 +114,12 @@ class SuratTandaTerimaResource extends Resource
                     ->date()
                     ->searchable()
                     ->sortable(),
+                Tables\Columns\IconColumn::make('status')
+                    ->boolean()
+                    ->alignment(Alignment::Center)
+                    ->trueIcon('heroicon-o-check-badge')
+                    ->falseIcon('heroicon-o-x-circle')
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -164,6 +171,35 @@ class SuratTandaTerimaResource extends Resource
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\EditAction::make(),
                     Tables\Actions\ViewAction::make(),
+                    Tables\Actions\Action::make('batalkan_surat')
+                        ->icon('heroicon-o-x-circle')
+                        ->requiresConfirmation()
+                        ->form([
+                            Forms\Components\TextInput::make('penanggung_jawab')
+                                // ->hiddenLabel()
+                                ->required()
+                                ->maxLength(255),
+                            Forms\Components\TextArea::make('keterangan')
+                                // ->hiddenLabel()
+                                ->required()
+                                ->rows(7)
+                                ->maxLength(255),
+                        ])
+                        ->action(function ($record, array $data): void {
+                            $record->update([
+                                'penanggung_jawab' => $data['penanggung_jawab'],
+                                'status' => false,
+                                'keterangan' => $data['keterangan'],
+                            ]);
+
+
+                            Notification::make()
+                                ->title('Data berhasil dibatalkan')
+                                ->success()
+                                ->send();
+                        })
+                        ->color('danger')
+                        ->hidden(fn($record) => $record->status === false),
                     Tables\Actions\DeleteAction::make(),
                     Tables\Actions\RestoreAction::make(),
                     Tables\Actions\ForceDeleteAction::make(),
