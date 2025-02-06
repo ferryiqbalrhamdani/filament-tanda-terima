@@ -17,6 +17,7 @@ use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\SuratTandaTerimaResource\Pages;
+use Malzariey\FilamentDaterangepickerFilter\Filters\DateRangeFilter;
 use App\Filament\Resources\SuratTandaTerimaResource\RelationManagers;
 
 class SuratTandaTerimaResource extends Resource
@@ -24,6 +25,10 @@ class SuratTandaTerimaResource extends Resource
     protected static ?string $model = SuratTandaTerima::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
+
+    protected static ?string $navigationGroup = 'Penomoran';
+
+    protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
     {
@@ -135,35 +140,8 @@ class SuratTandaTerimaResource extends Resource
             ])
             ->filters([
                 Tables\Filters\TrashedFilter::make(),
-                Tables\Filters\Filter::make('date_transaction')
-                    ->form([
-                        Forms\Components\DatePicker::make('date_transaction_from'),
-                        Forms\Components\DatePicker::make('date_transaction_until'),
-                    ])
-                    ->query(function (Builder $query, array $data): Builder {
-                        return $query
-                            ->when(
-                                $data['date_transaction_from'] ?? null,
-                                fn(Builder $query, $date): Builder => $query->whereDate('tanggal', '>=', $date),
-                            )
-                            ->when(
-                                $data['date_transaction_until'] ?? null,
-                                fn(Builder $query, $date): Builder => $query->whereDate('tanggal', '<=', $date),
-                            );
-                    })
-                    ->indicateUsing(function (array $data): array {
-                        $indicators = [];
-                        if ($data['date_transaction_from'] ?? null) {
-                            $indicators['date_transaction_from'] = 'Order from ' . Carbon::parse($data['date_transaction_from'])->toFormattedDateString();
-                        }
-                        if ($data['date_transaction_until'] ?? null) {
-                            $indicators['date_transaction_until'] = 'Order until ' . Carbon::parse($data['date_transaction_until'])->toFormattedDateString();
-                        }
-
-                        return $indicators;
-                    }),
-
-
+                DateRangeFilter::make('tanggal')
+                    ->label('Tanggal Tanda Terima'),
 
             ])
             ->defaultSort('nomor_document', 'desc')
