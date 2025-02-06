@@ -66,13 +66,9 @@ class CreateLetter extends CreateRecord
         $lastNumber = $this->getLastNumberForCompany($company, $tanggal);
 
         if ($jumlahSurat > 1) {
+            $counter = $lastNumber + 1;
             for ($i = 1; $i < $jumlahSurat; $i++) {
-                if ($lastNumberCompany == $lastNumber) {
-                    $counter = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
-                    $nomorSurat = "{$counter}/{$companySlug}/{$bulanRomawi}/{$tahun}";
-                } else {
-                    $nomorSurat = $this->generateLetterNumber($company, $tanggal, $lastNumber, $companySlug);
-                }
+                $nomorSurat = str_pad($counter, 3, '0', STR_PAD_LEFT) . "/{$companySlug}/{$bulanRomawi}/{$tahun}";
 
                 sleep(1);
 
@@ -84,6 +80,8 @@ class CreateLetter extends CreateRecord
                     'title' => $title,
                     'content' => $content,
                 ]);
+
+                $counter++;
             }
         }
     }
