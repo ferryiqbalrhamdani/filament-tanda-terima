@@ -203,7 +203,6 @@ class LetterResource extends Resource
 
                         $record->status = 'tidak terpakai';
                         $record->pic_id = null;
-                        $record->tanggal_surat = null;
                         $record->title = null;
                         $record->file = null;
                         $record->content = null;
