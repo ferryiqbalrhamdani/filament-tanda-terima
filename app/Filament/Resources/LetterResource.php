@@ -10,6 +10,7 @@ use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
+use Filament\Actions\StaticAction;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Support\Enums\Alignment;
 use Filament\Infolists\Components\Grid;
@@ -85,6 +86,8 @@ class LetterResource extends Resource
                         Forms\Components\Grid::make(2) // Menggunakan Grid untuk membuat 2 kolom
                             ->schema([
                                 Forms\Components\DatePicker::make('tanggal_surat')
+                                    ->timezone('Asia/Jakarta')
+                                    ->native(false)
                                     ->required()
                                     ->default(now())
                                     ->reactive()
@@ -315,6 +318,8 @@ class LetterResource extends Resource
                         ->modalWidth(MaxWidth::SixExtraLarge),
                     RelationManagerAction::make('history')
                         ->slideOver()
+                        ->modalSubmitAction(false)
+                        ->modalCancelAction(fn(StaticAction $action) => $action->label('Tutup'))
                         ->icon('heroicon-o-clock')
                         ->relationManager(RelationManagers\CancelLettersRelationManager::make())
                         ->color('gray'),

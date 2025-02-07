@@ -10,6 +10,11 @@ class EditLetter extends EditRecord
 {
     protected static string $resource = LetterResource::class;
 
+    public function getRelationManagers(): array
+    {
+        return [];
+    }
+
     protected function getHeaderActions(): array
     {
         return [
