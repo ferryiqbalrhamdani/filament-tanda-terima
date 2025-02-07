@@ -230,27 +230,13 @@ class LetterResource extends Resource
                     ->stickyModalFooter()
                     ->modalWidth(MaxWidth::TwoExtraLarge)
                     ->form([
-                        // Forms\Components\Section::make()
-                        //     ->schema([
-                        //         Forms\Components\Placeholder::make('pemberitahuan')
-                        //             ->content(function (Letter $record) {
-                        //                 $data = Letter::where('company_id', $record->company_id)->get();
-                        //                 $data_akhir = $data->where('tanggal_surat', '>', $record->tanggal_surat)->min('tanggal_surat');
-                        //                 $data_mulai = $data->where('tanggal_surat', '<', $record->tanggal_surat)->max('tanggal_surat');
-
-
-                        //                 $tanggal_surat = Carbon::parse($record->tanggal_surat)->format('d M, Y');
-                        //                 $tanggal_surat_akhir = Carbon::parse($data_akhir)->subDay(1)->format('d M, Y');
-                        //                 $tanggal_surat_mulai = Carbon::parse($data_mulai)->addDay(1)->format('d M, Y');
-
-                        //                 dd($data, $tanggal_surat, $data_akhir, $data_mulai);
-
-
-                        //                 $message = 'Untuk tanggal surat yang bisa di input antara tanggal ' . $tanggal_surat_mulai . ' s/d ' . ($data_akhir ? $tanggal_surat_akhir : $tanggal_surat);
-
-                        //                 return $message;
-                        //             }),
-                        //     ]),
+                        Forms\Components\Section::make()
+                            ->schema([
+                                Forms\Components\View::make('forms.components.letter-number')
+                                // Forms\Components\Placeholder::make('letter_number')
+                                //     ->label('Nomor Surat')
+                                //     ->content(fn(Letter $record): string => $record->letter_number)
+                            ]),
                         Forms\Components\Group::make()
                             ->schema([
                                 Forms\Components\DatePicker::make('tanggal_surat')
