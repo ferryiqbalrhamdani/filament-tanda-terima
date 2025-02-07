@@ -36,7 +36,7 @@ class LetterResource extends Resource
 
     protected static ?string $navigationGroup = 'Penomoran';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 10;
 
     public static function form(Form $form): Form
     {
@@ -125,6 +125,7 @@ class LetterResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('pic.name')
                     ->label('PIC')
+                    ->default('-')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('tanggal_surat')
                     ->date()
@@ -216,6 +217,7 @@ class LetterResource extends Resource
                     ->visible(fn(Letter $record): bool => $record->status !== 'tidak terpakai'),
                 Tables\Actions\Action::make('Gunakan Nomor Surat')
                     ->icon('heroicon-o-arrow-path-rounded-square')
+                    ->slideOver()
                     ->modal()
                     ->color('success')
                     ->hiddenLabel()
@@ -226,27 +228,27 @@ class LetterResource extends Resource
                     ->stickyModalFooter()
                     ->modalWidth(MaxWidth::TwoExtraLarge)
                     ->form([
-                        Forms\Components\Section::make()
-                            ->schema([
-                                Forms\Components\Placeholder::make('pemberitahuan')
-                                    ->content(function (Letter $record) {
-                                        $data = Letter::where('company_id', $record->company_id)->get();
-                                        $data_akhir = $data->where('tanggal_surat', '>', $record->tanggal_surat)->min('tanggal_surat');
-                                        $data_mulai = $data->where('tanggal_surat', '<', $record->tanggal_surat)->max('tanggal_surat');
+                        // Forms\Components\Section::make()
+                        //     ->schema([
+                        //         Forms\Components\Placeholder::make('pemberitahuan')
+                        //             ->content(function (Letter $record) {
+                        //                 $data = Letter::where('company_id', $record->company_id)->get();
+                        //                 $data_akhir = $data->where('tanggal_surat', '>', $record->tanggal_surat)->min('tanggal_surat');
+                        //                 $data_mulai = $data->where('tanggal_surat', '<', $record->tanggal_surat)->max('tanggal_surat');
 
 
-                                        $tanggal_surat = Carbon::parse($record->tanggal_surat)->format('d M, Y');
-                                        $tanggal_surat_akhir = Carbon::parse($data_akhir)->subDay(1)->format('d M, Y');
-                                        $tanggal_surat_mulai = Carbon::parse($data_mulai)->addDay(1)->format('d M, Y');
+                        //                 $tanggal_surat = Carbon::parse($record->tanggal_surat)->format('d M, Y');
+                        //                 $tanggal_surat_akhir = Carbon::parse($data_akhir)->subDay(1)->format('d M, Y');
+                        //                 $tanggal_surat_mulai = Carbon::parse($data_mulai)->addDay(1)->format('d M, Y');
 
-                                        // dd($data, $tanggal_surat, $tanggal_surat_akhir, $tanggal_surat_mulai);
+                        //                 dd($data, $tanggal_surat, $data_akhir, $data_mulai);
 
 
-                                        $message = 'Untuk tanggal surat yang bisa di input antara tanggal ' . $tanggal_surat_mulai . ' s/d ' . ($data_akhir ? $tanggal_surat_akhir : $tanggal_surat);
+                        //                 $message = 'Untuk tanggal surat yang bisa di input antara tanggal ' . $tanggal_surat_mulai . ' s/d ' . ($data_akhir ? $tanggal_surat_akhir : $tanggal_surat);
 
-                                        return $message;
-                                    }),
-                            ]),
+                        //                 return $message;
+                        //             }),
+                        //     ]),
                         Forms\Components\Group::make()
                             ->schema([
                                 Forms\Components\DatePicker::make('tanggal_surat')
@@ -380,6 +382,15 @@ class LetterResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),
+            ])
+            ->groups([
+                Tables\Grouping\Group::make('tanggal_surat')
+                    ->collapsible()
+                    ->date()
+                    ->label('Tanggal Surat'),
+                Tables\Grouping\Group::make('pic.name')
+                    ->collapsible()
+                    ->label('PIC'),
             ]);
     }
 
@@ -435,6 +446,7 @@ class LetterResource extends Resource
                             ->badge()
                             ->label('Perusahaan'),
                         TextEntry::make('pic.name')
+                            ->default('-')
                             ->label('PIC'),
                         Grid::make(3)
                             ->schema([
