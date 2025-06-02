@@ -13,6 +13,7 @@ use Filament\Resources\Resource;
 use Filament\Actions\StaticAction;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Support\Enums\Alignment;
+use Filament\Forms\Components\Repeater;
 use Filament\Infolists\Components\Grid;
 use Filament\Infolists\Components\Group;
 use Filament\Notifications\Notification;
@@ -43,6 +44,11 @@ class LetterResource extends Resource
     {
         return $form
             ->schema([
+                // Forms\Components\Section::make()
+                //     ->schema([
+                //         self::getItemsRepeater(),
+                //     ]),
+
                 Forms\Components\Section::make()
                     ->schema([
                         Forms\Components\TextInput::make('jumlah_surat')
@@ -57,7 +63,7 @@ class LetterResource extends Resource
                             ->disabled(),
                         Forms\Components\Select::make('company_id')
                             ->relationship(name: 'company', titleAttribute: 'slug')
-                            ->visibleOn('create')
+                            ->disabled(fn(string $operation) => $operation === 'edit')
                             ->searchable()
                             ->preload()
                             ->required()
@@ -109,6 +115,78 @@ class LetterResource extends Resource
                     ])
                     ->columns(3), // Jumlah kolom utama tetap 3
             ]);
+    }
+
+    public static function getItemsRepeater(): Repeater
+    {
+        return Repeater::make('')
+            ->label('')
+            ->relationship()
+            ->schema([
+                Forms\Components\Group::make()
+                    ->schema([
+                        Forms\Components\Grid::make(2) // Menggunakan Grid untuk membuat 2 kolom
+                            ->schema([
+                                Forms\Components\Select::make('company_id')
+                                    ->relationship(name: 'company', titleAttribute: 'slug')
+                                    ->visibleOn('create')
+                                    ->searchable()
+                                    ->preload()
+                                    ->required()
+                                    ->reactive()
+                                    ->required(),
+                                Forms\Components\Select::make('pic_id')
+                                    ->label('PIC')
+                                    ->relationship(name: 'pic', titleAttribute: 'name')
+                                    ->searchable()
+                                    ->preload()
+                                    ->required()
+                                    ->reactive()
+                                    ->required()
+                                    ->createOptionForm([
+                                        Forms\Components\TextInput::make('name')
+                                            ->label('Nama')
+                                            ->required()
+                                            ->maxLength(255),
+                                    ])
+                                    ->createOptionAction(function (Action $action) {
+                                        return $action
+                                            ->modalHeading('Buat PIC ')
+                                            ->modalSubmitActionLabel('Buat PIC ')
+                                            ->modalWidth('lg');
+                                    }),
+                            ]),
+                        Forms\Components\Grid::make(2) // Menggunakan Grid untuk membuat 2 kolom
+                            ->schema([
+                                Forms\Components\DatePicker::make('tanggal_surat')
+                                    ->timezone('Asia/Jakarta')
+                                    ->native(false)
+                                    ->required()
+                                    ->default(now())
+                                    ->reactive()
+                                    ->disabled(fn(string $operation): bool => $operation === 'edit')
+                                    ->maxDate(now()),
+                                Forms\Components\TextInput::make('title')
+                                    ->maxLength(255),
+                            ]),
+                        Forms\Components\FileUpload::make('file')
+                            ->columnSpanFull()
+                            ->visibleOn('edit')
+                            ->getUploadedFileNameForStorageUsing(
+                                fn(TemporaryUploadedFile $file): string => (string) str($file->getClientOriginalName())
+                                    ->prepend('file-'),
+                            ),
+                        Forms\Components\Textarea::make('content')
+                            ->columnSpanFull()
+                            ->rows(5),
+                    ]),
+            ])
+            ->defaultItems(1)
+            ->reorderable()
+            ->minItems(1)
+            ->collapsible()
+            ->columnSpan(3)
+        ;
     }
 
     public static function table(Table $table): Table
@@ -279,9 +357,19 @@ class LetterResource extends Resource
                             ->columns(2),
                     ])
                     ->action(function (Letter $record, array $data): void {
-                        // dd($record, $data);
+                        $tanggal = \Carbon\Carbon::parse($data['tanggal_surat']);
+                        $bulanRomawi = Letter::getRomanMonth($tanggal->month);
+                        $tahun = $tanggal->year;
+
+                        $parts = explode('/', $record->letter_number);
+                        $nomorUrut = $parts[0];
+                        $namaPt = $parts[1];
+
+                        // Buat ulang nomor surat
+                        $newLetterNumber = "{$nomorUrut}/{$namaPt}/{$bulanRomawi}/{$tahun}";
 
                         $record->status = 'terpakai';
+                        $record->letter_number = $newLetterNumber;
                         $record->tanggal_surat = $data['tanggal_surat'];
                         $record->pic_id = $data['pic_id'];
                         $record->title = $data['title'];
