@@ -13,6 +13,7 @@ use Filament\Resources\Resource;
 use Filament\Support\Enums\Alignment;
 use Filament\Resources\Components\Tab;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -208,7 +209,7 @@ class SuratTandaTerimaResource extends Resource
                     ->schema([
                         Forms\Components\Group::make()
                             ->schema([
-                                Forms\Components\Textarea::make('keterangan')
+                                Textarea::make('keterangan')
                                     ->columnSpanFull(),
                                 Forms\Components\TextInput::make('nomor_document')
                                     ->label('Nomor Dokumen'),

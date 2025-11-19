@@ -14,6 +14,7 @@ use Filament\Actions\StaticAction;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Support\Enums\Alignment;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Textarea;
 use Filament\Infolists\Components\Grid;
 use Filament\Infolists\Components\Group;
 use Filament\Notifications\Notification;
@@ -109,7 +110,7 @@ class LetterResource extends Resource
                                     ->prepend('file-'),
                             )
                             ->visibleOn('edit'),
-                        Forms\Components\Textarea::make('content')
+                        Textarea::make('content')
                             ->columnSpanFull()
                             ->rows(5),
                     ])
@@ -176,7 +177,7 @@ class LetterResource extends Resource
                                 fn(TemporaryUploadedFile $file): string => (string) str($file->getClientOriginalName())
                                     ->prepend('file-'),
                             ),
-                        Forms\Components\Textarea::make('content')
+                        Textarea::make('content')
                             ->columnSpanFull()
                             ->rows(5),
                     ]),
@@ -259,7 +260,7 @@ class LetterResource extends Resource
                         return 'Apakah Anda yakin ingin membatalkan Nomor Surat ' . $record->letter_number . '?';
                     })
                     ->form([
-                        Forms\Components\Textarea::make('reason')
+                        Textarea::make('reason')
                             ->label('Alasan Pembatalan')
                             ->required()
                             ->columnSpanFull()
@@ -350,7 +351,7 @@ class LetterResource extends Resource
                                         fn(TemporaryUploadedFile $file): string => (string) str($file->getClientOriginalName())
                                             ->prepend('file-'),
                                     ),
-                                Forms\Components\Textarea::make('content')
+                                Textarea::make('content')
                                     ->columnSpanFull()
                                     ->rows(5),
                             ])

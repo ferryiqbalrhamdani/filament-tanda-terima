@@ -10,6 +10,7 @@ use Filament\Forms\Set;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
+use Filament\Forms\Components\Textarea;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\CompanyResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -46,7 +47,7 @@ class CompanyResource extends Resource
                                     ->maxLength(255),
                                 Forms\Components\TextInput::make('tlpn')
                                     ->maxLength(255),
-                                Forms\Components\Textarea::make('address')
+                                Textarea::make('address')
                                     ->columnSpanFull(),
                             ])
                             ->columns(2),
