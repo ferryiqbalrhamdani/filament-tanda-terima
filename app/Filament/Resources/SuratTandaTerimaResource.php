@@ -158,7 +158,7 @@ class SuratTandaTerimaResource extends Resource
                                 // ->hiddenLabel()
                                 ->required()
                                 ->maxLength(255),
-                            Forms\Components\TextArea::make('keterangan')
+                            TextArea::make('keterangan')
                                 // ->hiddenLabel()
                                 ->required()
                                 ->rows(7)
