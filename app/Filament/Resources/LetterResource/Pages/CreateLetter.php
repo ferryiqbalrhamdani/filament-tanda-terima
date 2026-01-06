@@ -30,7 +30,7 @@ class CreateLetter extends CreateRecord
         }
 
         // Ambil nomor terakhir untuk perusahaan ini
-        $lastNumberCompany = $this->getLastNumberForCompanyActual($company);
+        $lastNumberCompany = $this->getLastNumberForCompanyActual($company, $tanggal);
         $lastNumber = $this->getLastNumberForCompany($company, $tanggal);
 
         if ($lastNumberCompany == $lastNumber) {
@@ -62,7 +62,7 @@ class CreateLetter extends CreateRecord
             ->where('id', $company)
             ->value('slug');
 
-        $lastNumberCompany = $this->getLastNumberForCompanyActual($company);
+        $lastNumberCompany = $this->getLastNumberForCompanyActual($company, $tanggal);
         $lastNumber = $this->getLastNumberForCompany($company, $tanggal);
 
         if ($jumlahSurat > 1) {
@@ -92,19 +92,28 @@ class CreateLetter extends CreateRecord
         return $romans[$month - 1];
     }
 
-    private function getLastNumberForCompany($company, $tanggal): int
+   private function getLastNumberForCompany($company, $tanggal): int
     {
         return DB::table('letters')
             ->where('company_id', $company)
-            ->whereDate('tanggal_surat', '<=', $tanggal)
-            ->max(DB::raw("CAST(regexp_replace(SPLIT_PART(letter_number, '/', 1), '[^0-9]', '', 'g') AS INTEGER)")) ?? 0;
+            ->whereYear('tanggal_surat', $tanggal->year) // 🔥 reset per tahun
+            ->max(DB::raw("
+                CAST(
+                    regexp_replace(SPLIT_PART(letter_number, '/', 1), '[^0-9]', '', 'g')
+                AS INTEGER)
+            ")) ?? 0;
     }
 
-    private function getLastNumberForCompanyActual($company): int
+    private function getLastNumberForCompanyActual($company, $tanggal): int
     {
         return DB::table('letters')
             ->where('company_id', $company)
-            ->max(DB::raw("CAST(regexp_replace(SPLIT_PART(letter_number, '/', 1), '[^0-9]', '', 'g') AS INTEGER)")) ?? 0;
+            ->whereYear('tanggal_surat', $tanggal->year)
+            ->max(DB::raw("
+                CAST(
+                    regexp_replace(SPLIT_PART(letter_number, '/', 1), '[^0-9]', '', 'g')
+                AS INTEGER)
+            ")) ?? 0;
     }
 
     private function generateLetterNumber($company, $tanggal, $lastNumber, $companySlug): string
